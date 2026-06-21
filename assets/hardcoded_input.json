@@ -1,0 +1,6 @@
+{
+  "patient_name": "Hardcoded John Doe",
+  "claim_category": "MEDICAL",
+  "treatment_date": "2026-06-15",
+  "claimed_amt": 5000.00
+}
