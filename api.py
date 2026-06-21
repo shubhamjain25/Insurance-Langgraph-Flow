@@ -1,11 +1,13 @@
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile, Form, Header, HTTPException, Depends
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from main import compiled_graph
-from agent.schema_structures.Schema import DocumentValidator, ClaimCategory
+from agent.schema_structures.Schema import DocumentValidator, ClaimCategory, DocumentCategory
 import os
 import shutil
 from datetime import date
+
+API_KEY = os.environ["API_KEY"]
 
 app = FastAPI()
 
@@ -20,6 +22,12 @@ app.add_middleware(
 # Ensure the uploads directory exists
 os.makedirs("uploads", exist_ok=True)
 
+async def require_api_key(x_api_key: str = Header(default="")):
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+# @app.post("/process-claim")   #Simple Call
+
 # @app.post("/process-claim")
 # async def run_langgraph(
 #     patient_name: str = Form(default="Kumar Saravana"),
@@ -29,13 +37,14 @@ os.makedirs("uploads", exist_ok=True)
 #     document: UploadFile = File(...)
 # ):
 
-@app.post("/process-claim")
+@app.post("/process-claim", dependencies=[Depends(require_api_key)])    #Secured Call
 async def run_langgraph(
-    patient_name: str = Form(default="Kumar Saravana"),
-    claim_category: ClaimCategory = Form(default="IPD"),
-    treatment_date: date = Form(default=date(2014, 1, 11)),
-    claimed_amt: float = Form(default="1000"),
-    document: UploadFile = File(...)
+        patient_name: str = Form(...),
+        claim_category: ClaimCategory = Form(...),
+        document_category: DocumentCategory = Form(...),
+        treatment_date: str = Form(...),
+        claimed_amt: float = Form(...),
+        document: UploadFile = File(...)
 ):
     # Save the uploaded file locally
     file_path = f"uploads/{document.filename}"
@@ -46,11 +55,12 @@ async def run_langgraph(
     initial_state = {
         "user_information": {
             "patient_name": patient_name,
-            "claim_category": claim_category,
             "treatment_date": treatment_date,
             "claimed_amt": claimed_amt,
         },
         "document_name": document.filename,
+        "claim_category": claim_category,
+        "document_category": document_category,
         "status": "initiated",
         "count_itr": 0
     }

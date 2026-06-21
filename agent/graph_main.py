@@ -25,6 +25,7 @@ def get_graph():
         parser_router,{
             "APPROVED": "processor_node",
             "FAILED": "parser_node",
+            "REJECTED": "aggregator_node",
             "RETRY_EXHAUSTED": "aggregator_node",
         }
     )

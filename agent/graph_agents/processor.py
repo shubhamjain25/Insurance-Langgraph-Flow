@@ -1,6 +1,6 @@
 from agent.schema_structures.Schema import *
 from agent.llm_models import get_deterministic_llm
-from agent.query_dictionaries.query_dictionary import get_processor_human_query, get_processor_system_query
+from agent.query_dictionaries.query_lookup import get_processor_system_query, get_processor_human_query
 from langchain_core.messages import SystemMessage, HumanMessage
 import json
 

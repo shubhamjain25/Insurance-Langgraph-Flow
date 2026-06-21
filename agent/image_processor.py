@@ -54,7 +54,7 @@ def extract_text(document_name):
         }
 
 
-def extract_text_hardcoded(file_path):
+def extract_text_hardcoded():
     hardcoded_text_val = f"""
         ====================
         # Apollo

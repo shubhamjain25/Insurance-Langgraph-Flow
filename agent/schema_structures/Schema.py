@@ -4,6 +4,7 @@ import operator
 from langgraph.graph import add_messages
 from enum import Enum
 from datetime import date
+from agent.schema_structures.OCRSchema import *
 
 class ClaimCategory(str, Enum):
     CONSULTATION = "CONSULTATION"
@@ -25,9 +26,6 @@ class UserInputInformation(BaseModel):
     patient_name: str = Field(
         description="Stores the name of the patient"
     )
-    claim_category: ClaimCategory = Field(
-        description="Category of the uploaded document"
-    )
     treatment_date: date = Field(
         description="Date of the treatment"
     )
@@ -35,19 +33,13 @@ class UserInputInformation(BaseModel):
         description="Amount of the bill"
     )
 
-class OCRInformation(BaseModel):
-    patient_name: str = Field(
-        description="Stores the name of the patient"
-    )
-    claim_category: ClaimCategory = Field(
-        description="Category of the uploaded document"
-    )
-    treatment_date: date = Field(
-        description="Date of the treatment"
-    )
-    bill_amt: float = Field(
-        description="Amount of the bill"
-    )
+# Pydantic will check the "doc_type" field & dynamically decide
+# which specific OCR Schema to use for validation.
+# DYNAMIC UNION (Replaced the old static OCRInformation)
+DynamicOCRInformation = Annotated[
+    Union[PrescriptionOCR, HospitalBillOCR, LabReportOCR, DiagnosticReportOCR, DischargeSummaryOCR, PharmacyBillOCR],
+    Field(discriminator="doc_type")
+]
 
 # # Pydantic will check the "doc_type" field & dynamically decide
 # # which specific OCR Schema to use for validation.
@@ -71,10 +63,11 @@ class ProcessingResult(BaseModel):
 class DocumentValidator(TypedDict):
 
     user_information : UserInputInformation
-    ocr_information: OCRInformation
+    ocr_information: DynamicOCRInformation
     processing_result: ProcessingResult
-    status: Literal["initiated","parsed_success","parsed_failure","parse_aborted","processed"]
+    status: Literal["initiated","parsed_success","parsed_failure","parse_aborted","parse_rejected","processed"]
     count_itr: Annotated[int, operator.add] = 0
     document_name: str
-    claim_category: ClaimCategory
     claimed_amt: float
+    claim_category: ClaimCategory
+    document_category: DocumentCategory #Added
