@@ -48,7 +48,7 @@ DynamicOCRInformation = Annotated[
 #     Field(discriminator="doc_type")
 
 class ProcessingResult(BaseModel):
-    result: Literal["PASS", "FAIL"] = Field(
+    result: Literal["PASS", "REVIEW", "FAIL"] = Field(
         description="Final evaluation outcome"
     )
     confidence_score: float = Field(
@@ -70,4 +70,4 @@ class DocumentValidator(TypedDict):
     document_name: str
     claimed_amt: float
     claim_category: ClaimCategory
-    document_category: DocumentCategory #Added
+    document_category: DocumentCategory

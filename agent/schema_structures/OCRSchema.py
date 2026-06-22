@@ -28,6 +28,7 @@ class PrescriptionOCR(BaseModel):
     reasoning: str = Field(
         description="2-Liner explanation of the clarity_score & classification_score"
     )
+
     #To deal with open-source LLM issues
     @field_validator("patient_name","doctor_name", "diagnosis", mode="before")
     @classmethod

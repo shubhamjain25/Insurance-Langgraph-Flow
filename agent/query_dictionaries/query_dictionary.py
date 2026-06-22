@@ -199,16 +199,16 @@ def get_common_processor_system_query() -> str:
         
         Input 1 (User Claim Data):
         - claimed_amount
-        - claim_category
         - patient_name
         - treatment_date
+        - claim_category
         
         Input 2 (OCR Extracted Data):
-        - clean_category
         - patient_name
         - bill_amount
         - treatment_date
-        
+        - claim_category
+        - document_category     
         ---------------------------
         Instructions:
         
@@ -218,15 +218,15 @@ def get_common_processor_system_query() -> str:
         
         2. Field Matching:
         - patient_name must match (allow minor OCR spelling variations)
-        - claim_category and clean_category must be semantically similar
         - treatment_date must match exactly (format differences allowed)
         
         3. Final Decision:
-        PASS only if ALL are true:
+        PASS only if ALL are true and confidence score>=0.75:
         - Financial rule passes
         - Patient name matches
-        - Category matches or is equivalent
         - Treatment date matches
+        
+        REVIEW if confidence score>=0.5 and <0.75:
         
         Otherwise FAIL.
         

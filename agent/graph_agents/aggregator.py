@@ -13,7 +13,7 @@ def aggregator_agent(p_state: DocumentValidator):
     else:
 
         if p_state["status"] == "parsed_success":
-
+            #Parsed Successfully but Failed because of either clarity/wrong doc uploaded
             result = ProcessingResult(
                 result="FAIL",
                 confidence_score=1.0,
@@ -21,6 +21,7 @@ def aggregator_agent(p_state: DocumentValidator):
             )
 
         else:
+            #Exhausted Retry_Limit
             result = ProcessingResult(
                 result="FAIL",
                 confidence_score=1.0,
