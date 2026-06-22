@@ -6,6 +6,9 @@ from agent.schema_structures.Schema import DocumentValidator, ClaimCategory, Doc
 import os
 import shutil
 from datetime import date
+import markdown
+from fastapi.responses import HTMLResponse
+from pathlib import Path
 
 API_KEY = os.environ["API_KEY"]
 
@@ -22,21 +25,16 @@ app.add_middleware(
 # Ensure the uploads directory exists
 os.makedirs("uploads", exist_ok=True)
 
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+def homepage():
+    html = Path("intro.html").read_text(encoding="utf-8")
+    return HTMLResponse(content=html)
+
 async def require_api_key(x_api_key: str = Header(default="")):
     if x_api_key != API_KEY:
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 # @app.post("/process-claim")   #Simple Call
-
-# @app.post("/process-claim")
-# async def run_langgraph(
-#     patient_name: str = Form(default="Kumar Saravana"),
-#     claim_category: str = Form(...),
-#     treatment_date: str = Form(...),
-#     claimed_amt: float = Form(...),
-#     document: UploadFile = File(...)
-# ):
-
 @app.post("/process-claim", dependencies=[Depends(require_api_key)])    #Secured Call
 async def run_langgraph(
         patient_name: str = Form(...),
@@ -71,7 +69,6 @@ async def run_langgraph(
 
     # 4. Return the typed schema back to React
     return {"status": "success", "data": final_state}
-
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

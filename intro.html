@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claim Wizard — Document Intelligence Pipeline</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, system-ui, sans-serif;
+    background: #0b1020;
+    color: #f4f7fb;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 48px 24px;
+}
+
+.top-cta {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 36px;
+}
+
+.try-btn {
+    text-decoration: none;
+    background: #ffffff;
+    color: #111827;
+    padding: 14px 22px;
+    border-radius: 12px;
+    font-weight: 700;
+    transition: .2s;
+}
+
+.try-btn:hover {
+    transform: translateY(-2px);
+}
+
+.hero {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 16px;
+}
+
+.hero p {
+    max-width: 850px;
+    margin: auto;
+    color: #cfd7e6;
+    line-height: 1.7;
+}
+
+.grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.card {
+    background: #131b31;
+    border: 1px solid #22304d;
+    border-radius: 18px;
+    padding: 24px;
+}
+
+.card h2 {
+    margin-bottom: 14px;
+}
+
+.card ul {
+    padding-left: 18px;
+}
+
+.card li {
+    margin-bottom: 10px;
+    color: #d5ddef;
+}
+
+.flow {
+    background: #11192d;
+    border-radius: 16px;
+    padding: 18px;
+    overflow-x: auto;
+    font-family: monospace;
+    white-space: pre;
+    color: #cfd7e6;
+}
+
+.endpoint {
+    background: #0f172a;
+    border: 1px solid #263554;
+    padding: 16px;
+    border-radius: 12px;
+    margin-top: 12px;
+}
+
+.footer {
+    margin-top: 40px;
+    text-align: center;
+    color: #93a0bb;
+}
+
+code {
+    color: #9fd6ff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="top-cta">
+<a class="try-btn" href="/docs">
+Try this service now →
+</a>
+</div>
+
+<section class="hero">
+<h1>🏥 Claim Wizard</h1>
+<p>
+AI-powered insurance claim document processing built using
+LangGraph, FastAPI, and Groq.
+Upload a medical document and the workflow performs OCR,
+field extraction, confidence scoring, and returns a final
+PASS / REVIEW / FAIL outcome.
+</p>
+</section>
+
+<div class="grid">
+
+<div class="card">
+<h2>🧠 Workflow</h2>
+
+<div class="flow">
+START
+ ↓
+input_node
+ ↓
+parser_node
+ ├─ APPROVED → processor_node
+ ├─ REJECTED → aggregator_node
+ └─ FAILED → retry (max 2 retries)
+
+ ↓
+aggregator_node
+ ↓
+END
+</div>
+
+</div>
+
+<div class="card">
+<h2>📄 Supported Claim Categories</h2>
+<ul>
+<li>CONSULTATION</li>
+<li>DIAGNOSTIC</li>
+<li>PHARMACY</li>
+<li>DENTAL</li>
+<li>VISION</li>
+<li>ALTERNATIVE_MEDICINE</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>📎 Supported Document Categories</h2>
+<ul>
+<li>PRESCRIPTION</li>
+<li>HOSPITAL_BILL</li>
+<li>LAB_REPORT</li>
+<li>DIAGNOSTIC_REPORT</li>
+<li>DISCHARGE_SUMMARY</li>
+<li>PHARMACY_BILL</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>📊 Scoring Signals</h2>
+<ul>
+<li><strong>clarity_score</strong> → document legibility & parse quality</li>
+<li><strong>classification_score</strong> → confidence of claim ↔ document match</li>
+<li><strong>confidence_score</strong> → processing confidence in final result</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>⚙️ Routing Rules</h2>
+<ul>
+<li>Parsed + thresholds passed → APPROVED</li>
+<li>Parsed but low confidence → REJECTED</li>
+<li>Parse failure + retries left → Retry parser</li>
+<li>Retry exhausted → Final aggregation</li>
+</ul>
+</div>
+
+<!-- API CARD -->
+    <div class="card"> <h2>📡 API</h2> <div class="endpoint"> POST <code>/process-claim</code> </div> <p style="margin-top:12px;color:#cfd7e6;"> Requires header: <code>x-api-key</code> </p> <p style=" margin-top:10px; color:#93a0bb; line-height:1.7; "> API Key = My name converted to lowercase without any spaces & hyphen in between. <br><br> Example: <br> If my name = <code>John Doe</code> <br> then X-API-KEY = <code> john-doe</code> </p> </div>
+
+</div>
+
+<div class="footer"> <div style=" font-weight:700; margin-bottom:14px; " > Powered by LangGraph • FastAPI • Groq </div> <div style=" max-width:850px; margin:auto; line-height:1.8; color:#b8c4d9; " > Claim Wizard is an AI-powered insurance document processing workflow that automates claim validation. <br><br> Upload a supported medical document and the system performs OCR extraction, validates document quality, evaluates whether the uploaded document matches the selected claim and document category, applies confidence scoring, and returns a final processing outcome with supporting reasoning. <br><br> Built as a stateful LangGraph pipeline with structured routing, retry handling, and consolidated output for insurance claim review workflows. </div> </div>
+
+</div>
+
+</body>
+</html>

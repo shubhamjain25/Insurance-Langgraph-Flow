@@ -1,5 +1,5 @@
 from agent.schema_structures.Schema import *
-from agent.image_processor import extract_text, extract_text_hardcoded
+from agent.document_ocr_processor import extract_text, extract_text_hardcoded
 from agent.llm_models import get_deterministic_llm
 from agent.query_dictionaries.query_lookup import get_parser_system_query, get_parser_human_query
 from langchain_core.messages import SystemMessage, HumanMessage
