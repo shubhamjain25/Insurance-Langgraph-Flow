@@ -2,6 +2,9 @@
 
 An AI-powered insurance claim document processing backend built with **LangGraph**, **FastAPI**, and **Groq**. Upload a medical document, and the pipeline automatically performs OCR, field extraction, confidence scoring, and a final PASS/FAIL verdict — all orchestrated as a stateful LangGraph workflow.
 
+- 🎥 [YouTube Architecture & Project Walkthrough](https://www.youtube.com/watch?v=qGBj17hSVvU)
+- 🌐 [LangGraph Workflow Live Demo](https://insurance-langgraph-flow.onrender.com/)
+
 ---
 
 ## 🧠 How It Works
