@@ -6,7 +6,6 @@ from agent.schema_structures.Schema import DocumentValidator, ClaimCategory, Doc
 import os
 import shutil
 from datetime import date
-import markdown
 from fastapi.responses import HTMLResponse
 from pathlib import Path
 
@@ -40,7 +39,8 @@ async def run_langgraph(
         patient_name: str = Form(...),
         claim_category: ClaimCategory = Form(...),
         document_category: DocumentCategory = Form(...),
-        treatment_date: str = Form(...),
+        # treatment_date: str = Form(...),
+        treatment_date: date = Form(...),
         claimed_amt: float = Form(...),
         document: UploadFile = File(...)
 ):
@@ -53,7 +53,7 @@ async def run_langgraph(
     initial_state = {
         "user_information": {
             "patient_name": patient_name,
-            "treatment_date": treatment_date,
+            "treatment_date": treatment_date.isoformat(),
             "claimed_amt": claimed_amt,
         },
         "document_name": document.filename,

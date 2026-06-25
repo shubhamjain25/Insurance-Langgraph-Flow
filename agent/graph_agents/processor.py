@@ -10,7 +10,7 @@ def processor_agent(p_state: DocumentValidator):
 
         llm = get_deterministic_llm()
 
-        system_query = str(get_processor_system_query())
+        system_query = str(get_processor_system_query(p_state['document_category'], p_state['claim_category']))
         human_query = str(get_processor_human_query(p_state['user_information'], p_state['ocr_information']))
 
         llm_resp = llm.invoke([

@@ -247,6 +247,297 @@ def get_common_processor_system_query() -> str:
     """
     return query
 
+# ---------------------------------------------------------
+# PROCESSOR COMMON RULES (shared across all doc types)
+# ---------------------------------------------------------
+
+PROCESSOR_COMMON_INSTRUCTIONS = f"""
+CRITICAL OUTPUT INSTRUCTIONS:
+1. DO NOT wrap output in markdown code blocks. Return raw JSON only.
+2. Do not invent, infer, or hallucinate values.
+3. Return strictly in the format {ProcessingResult.model_json_schema()} — no metadata, no extra fields.
+
+Decision Thresholds:
+- PASS   → confidence_score >= 0.75 AND all applicable rules below pass
+- REVIEW → confidence_score >= 0.5 and < 0.75
+- FAIL   → any hard rule fails OR confidence_score < 0.5
+
+Confidence Score:
+- Range: 0.0 to 1.0
+- Higher when all fields strongly match with no ambiguity
+- Lower when OCR errors, partial matches, or missing fields exist
+
+Reasoning:
+- Exactly TWO lines:
+  Line 1: What was compared and what matched or mismatched
+  Line 2: Why the final decision was reached
+"""
+
+
+# ---------------------------------------------------------
+# NON-FINANCIAL PROCESSOR QUERIES
+# (PRESCRIPTION, LAB_REPORT, DIAGNOSTIC_REPORT, DISCHARGE_SUMMARY)
+# No total_amount field exists in these OCR schemas.
+# Financial comparison must NOT be performed.
+# ---------------------------------------------------------
+
+def get_prescription_processor_query(claim_category) -> str:
+    return f"""
+        You are an expert medical-claim reconciliation engine evaluating a PRESCRIPTION document
+        submitted under a {claim_category} claim.
+
+        You compare two inputs:
+
+        Input 1 (User Claim Data):
+        - patient_name
+        - treatment_date
+        - claim_category
+
+        Input 2 (OCR Extracted Data):
+        - patient_name
+        - doctor_name
+        - treatment_date
+        - diagnosis
+
+        ---------------------------
+        Reconciliation Rules:
+
+        1. Patient Name Match:
+           - Names must match (allow minor OCR spelling variations and abbreviations)
+
+        2. Date Match:
+           - OCR treatment_date must match user-provided treatment_date
+           - Allow format differences (DD-MM-YYYY vs YYYY-MM-DD etc.)
+           - If OCR treatment_date is null/missing, penalise confidence but do not auto-FAIL
+
+        3. Document Relevance:
+           - Diagnosis and prescription content must be plausibly relevant to the {claim_category} claim
+           - A prescription for dental work under a CONSULTATION claim is acceptable
+           - An irrelevant or mismatched diagnosis should lower confidence
+
+        4. NO financial comparison — this document type carries no billed amount.
+
+        {PROCESSOR_COMMON_INSTRUCTIONS}
+    """
+
+
+def get_lab_report_processor_query(claim_category) -> str:
+    return f"""
+        You are an expert medical-claim reconciliation engine evaluating a LAB_REPORT document
+        submitted under a {claim_category} claim.
+
+        You compare two inputs:
+
+        Input 1 (User Claim Data):
+        - patient_name
+        - treatment_date
+        - claim_category
+
+        Input 2 (OCR Extracted Data):
+        - patient_name
+        - test_name
+        - report_date
+        - laboratory_name
+        - result_summary
+
+        ---------------------------
+        Reconciliation Rules:
+
+        1. Patient Name Match:
+           - Names must match (allow minor OCR spelling variations and abbreviations)
+
+        2. Date Match:
+           - OCR report_date must match or be close to user-provided treatment_date
+           - Lab reports may be dated 1–3 days before or after treatment; allow this window
+           - If OCR report_date is null/missing, penalise confidence but do not auto-FAIL
+
+        3. Document Relevance:
+           - test_name and result_summary must be plausibly relevant to the {claim_category} claim
+           - A blood test under a CONSULTATION claim is acceptable
+           - Completely unrelated tests should lower confidence
+
+        4. NO financial comparison — this document type carries no billed amount.
+
+        {PROCESSOR_COMMON_INSTRUCTIONS}
+    """
+
+
+def get_diagnostic_report_processor_query(claim_category) -> str:
+    return f"""
+        You are an expert medical-claim reconciliation engine evaluating a DIAGNOSTIC_REPORT document
+        submitted under a {claim_category} claim.
+
+        You compare two inputs:
+
+        Input 1 (User Claim Data):
+        - patient_name
+        - treatment_date
+        - claim_category
+
+        Input 2 (OCR Extracted Data):
+        - patient_name
+        - test_name
+        - report_date
+        - reporting_doctor
+        - impression
+
+        ---------------------------
+        Reconciliation Rules:
+
+        1. Patient Name Match:
+           - Names must match (allow minor OCR spelling variations and abbreviations)
+
+        2. Date Match:
+           - OCR report_date must match or be close to user-provided treatment_date
+           - Diagnostic reports may be dated 1–3 days before or after treatment; allow this window
+           - If OCR report_date is null/missing, penalise confidence but do not auto-FAIL
+
+        3. Document Relevance:
+           - test_name (e.g. X-Ray, MRI, CT, ECG) and impression must be plausibly relevant to the {claim_category} claim
+           - Completely unrelated procedures should lower confidence
+
+        4. NO financial comparison — this document type carries no billed amount.
+
+        {PROCESSOR_COMMON_INSTRUCTIONS}
+    """
+
+
+def get_discharge_summary_processor_query(claim_category) -> str:
+    return f"""
+        You are an expert medical-claim reconciliation engine evaluating a DISCHARGE_SUMMARY document
+        submitted under a {claim_category} claim.
+
+        You compare two inputs:
+
+        Input 1 (User Claim Data):
+        - patient_name
+        - treatment_date
+        - claim_category
+
+        Input 2 (OCR Extracted Data):
+        - patient_name
+        - hospital_name
+        - admission_date
+        - discharge_date
+        - diagnosis
+
+        ---------------------------
+        Reconciliation Rules:
+
+        1. Patient Name Match:
+           - Names must match (allow minor OCR spelling variations and abbreviations)
+
+        2. Date Window Check:
+           - User-provided treatment_date must fall within the OCR admission_date to discharge_date window (inclusive)
+           - If either admission_date or discharge_date is null/missing, penalise confidence but do not auto-FAIL
+           - treatment_date falling outside the window is a hard FAIL
+
+        3. Document Relevance:
+           - diagnosis must be plausibly relevant to the {claim_category} claim
+           - Unrelated diagnoses should lower confidence
+
+        4. NO financial comparison — this document type carries no billed amount.
+
+        {PROCESSOR_COMMON_INSTRUCTIONS}
+    """
+
+
+# ---------------------------------------------------------
+# FINANCIAL PROCESSOR QUERIES
+# (HOSPITAL_BILL, PHARMACY_BILL)
+# These OCR schemas contain total_amount — financial check applies.
+# ---------------------------------------------------------
+
+def get_hospital_bill_processor_query(claim_category) -> str:
+    return f"""
+        You are an expert medical-claim reconciliation engine evaluating a HOSPITAL_BILL document
+        submitted under a {claim_category} claim.
+
+        You compare two inputs:
+
+        Input 1 (User Claim Data):
+        - patient_name
+        - treatment_date
+        - claimed_amount
+        - claim_category
+
+        Input 2 (OCR Extracted Data):
+        - patient_name
+        - hospital_name
+        - bill_date
+        - total_amount
+        - bill_number
+
+        ---------------------------
+        Reconciliation Rules:
+
+        1. Financial Rule:
+           - If OCR total_amount >= claimed_amount → financial check passes
+           - If OCR total_amount < claimed_amount → financial check fails (hard FAIL)
+           - If OCR total_amount is 0 or missing → penalise confidence heavily but do not auto-FAIL
+
+        2. Patient Name Match:
+           - Names must match (allow minor OCR spelling variations and abbreviations)
+
+        3. Date Match:
+           - OCR bill_date must match user-provided treatment_date
+           - Allow format differences (DD-MM-YYYY vs YYYY-MM-DD etc.)
+           - If OCR bill_date is null/missing, penalise confidence but do not auto-FAIL
+
+        4. Final Decision:
+           PASS only if ALL three rules pass and confidence_score >= 0.75
+           REVIEW if confidence_score >= 0.5 and < 0.75
+           FAIL if financial rule fails OR confidence_score < 0.5
+
+        {PROCESSOR_COMMON_INSTRUCTIONS}
+    """
+
+
+def get_pharmacy_bill_processor_query(claim_category) -> str:
+    return f"""
+        You are an expert medical-claim reconciliation engine evaluating a PHARMACY_BILL document
+        submitted under a {claim_category} claim.
+
+        You compare two inputs:
+
+        Input 1 (User Claim Data):
+        - patient_name
+        - treatment_date
+        - claimed_amount
+        - claim_category
+
+        Input 2 (OCR Extracted Data):
+        - patient_name
+        - pharmacy_name
+        - bill_date
+        - total_amount
+        - bill_number
+
+        ---------------------------
+        Reconciliation Rules:
+
+        1. Financial Rule:
+           - If OCR total_amount >= claimed_amount → financial check passes
+           - If OCR total_amount < claimed_amount → financial check fails (hard FAIL)
+           - If OCR total_amount is 0 or missing → penalise confidence heavily but do not auto-FAIL
+
+        2. Patient Name Match:
+           - Names must match (allow minor OCR spelling variations and abbreviations)
+
+        3. Date Match:
+           - OCR bill_date must match user-provided treatment_date
+           - Allow format differences (DD-MM-YYYY vs YYYY-MM-DD etc.)
+           - Pharmacy bills may be dated 1–2 days after the treatment date; allow this window
+           - If OCR bill_date is null/missing, penalise confidence but do not auto-FAIL
+
+        4. Final Decision:
+           PASS only if ALL three rules pass and confidence_score >= 0.75
+           REVIEW if confidence_score >= 0.5 and < 0.75
+           FAIL if financial rule fails OR confidence_score < 0.5
+
+        {PROCESSOR_COMMON_INSTRUCTIONS}
+    """
+
 
 def get_common_processor_human_query(user_data, ocr_data) -> str:
     query = f"""
