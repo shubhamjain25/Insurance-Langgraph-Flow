@@ -34,7 +34,13 @@ async def require_api_key(x_api_key: str = Header(default="")):
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 # @app.post("/process-claim")   #Simple Call
-@app.post("/process-claim", dependencies=[Depends(require_api_key)])    #Secured Call
+@app.post("/process-claim",
+          dependencies=[Depends(require_api_key)],
+          description="""
+            Sample medical documents for testing the service:
+            [Fabricated Medical Documents](https://github.com/shubhamjain25/Insurance-Langgraph-Flow/tree/main/uploads)
+            """
+          )    #Secured Call
 async def run_langgraph(
         patient_name: str = Form(...),
         claim_category: ClaimCategory = Form(...),

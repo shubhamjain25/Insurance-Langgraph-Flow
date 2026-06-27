@@ -1,232 +1,743 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Claim Wizard — Document Intelligence Pipeline</title>
-
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+:root {
+  --bg:        #09090E;
+  --surface:   #0F1117;
+  --surface-2: #161922;
+  --border:    #1D2235;
+  --border-2:  #262E44;
+  --pass:      #16C784;
+  --review:    #F59E0B;
+  --fail:      #EF4444;
+  --blue:      #3B82F6;
+  --indigo:    #818CF8;
+  --text:      #EEF2FF;
+  --muted:     #8892AA;
+  --dim:       #4A5368;
 }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
 body {
-    font-family: Inter, system-ui, sans-serif;
-    background: #0b1020;
-    color: #f4f7fb;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
-.container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 48px 24px;
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(9,9,14,0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  height: 58px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 36px;
 }
 
-.top-cta {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 36px;
+.h-logo {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.95rem; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--text); text-decoration: none;
+  display: flex; align-items: center; gap: 8px;
 }
+.h-logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pass); }
 
-.try-btn {
-    text-decoration: none;
-    background: #ffffff;
-    color: #111827;
-    padding: 14px 22px;
-    border-radius: 12px;
-    font-weight: 700;
-    transition: .2s;
+.h-right { display: flex; align-items: center; gap: 10px; }
+
+.btn-ghost {
+  font-size: 0.82rem; color: var(--muted);
+  padding: 7px 14px; border-radius: 7px;
+  border: 1px solid var(--border-2);
+  text-decoration: none;
+  transition: color .18s, border-color .18s;
 }
+.btn-ghost:hover { color: var(--text); border-color: var(--muted); }
 
-.try-btn:hover {
-    transform: translateY(-2px);
+.btn-primary {
+  font-size: 0.82rem; font-weight: 600;
+  background: var(--pass); color: #000;
+  padding: 7px 16px; border-radius: 7px;
+  text-decoration: none;
+  transition: opacity .18s, transform .18s;
 }
+.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
 
+/* ── LAYOUT ── */
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+
+/* ── HERO ── */
 .hero {
-    text-align: center;
-    margin-bottom: 48px;
+  padding: 96px 0 80px;
+  position: relative; overflow: hidden;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 26px 26px;
 }
+.hero::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 80px;
+  background: linear-gradient(to bottom, transparent, var(--bg));
+  pointer-events: none;
+}
+.hero-glow {
+  position: absolute; top: -180px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 380px;
+  background: radial-gradient(ellipse, rgba(22,199,132,0.07) 0%, transparent 68%);
+  pointer-events: none;
+}
+
+.hero-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.04em;
+  color: var(--pass);
+  border: 1px solid rgba(22,199,132,0.28);
+  background: rgba(22,199,132,0.06);
+  padding: 5px 13px; border-radius: 100px;
+  margin-bottom: 26px;
+}
+.hero-pill-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--pass); }
 
 .hero h1 {
-    font-size: 3rem;
-    margin-bottom: 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(2rem, 4.8vw, 3.4rem);
+  font-weight: 700; line-height: 1.08; letter-spacing: -0.04em;
+  margin-bottom: 22px; max-width: 700px;
+}
+.hero h1 em { font-style: normal; color: var(--pass); }
+
+.hero-sub {
+  font-size: 1.05rem; color: var(--muted);
+  max-width: 580px; line-height: 1.78; margin-bottom: 40px;
 }
 
-.hero p {
-    max-width: 850px;
-    margin: auto;
-    color: #cfd7e6;
-    line-height: 1.7;
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.hero-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--dim); background: var(--surface-2);
+  border: 1px solid var(--border); padding: 5px 12px; border-radius: 5px;
 }
 
-.grid {
-    display: grid;
-    gap: 20px;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+/* ── SECTION CHROME ── */
+.s-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+  color: var(--pass); letter-spacing: 0.14em; text-transform: uppercase;
+  margin-bottom: 10px;
 }
+.s-title {
+  font-family: 'Space Mono', monospace; font-size: 1.55rem;
+  font-weight: 700; letter-spacing: -0.03em; margin-bottom: 10px;
+}
+.s-desc {
+  color: var(--muted); max-width: 580px; margin-bottom: 44px; line-height: 1.72;
+}
+
+section { padding: 76px 0; }
+section + section { padding-top: 0; }
+
+/* ── PIPELINE ── */
+.pipeline-layout {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start;
+}
+.pipeline-diagram {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px 20px;
+  display: flex; justify-content: center;
+}
+.pipeline-diagram svg { width: 100%; max-width: 340px; }
+
+.pipeline-legend { display: flex; flex-direction: column; gap: 18px; }
+.leg-item { display: flex; align-items: flex-start; gap: 13px; }
+.leg-bar { width: 3px; border-radius: 2px; flex-shrink: 0; margin-top: 3px; align-self: stretch; min-height: 48px; }
+.leg-name {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 500;
+  margin-bottom: 4px;
+}
+.leg-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.55; }
+
+/* ── CATEGORIES ── */
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
 .card {
-    background: #131b31;
-    border: 1px solid #22304d;
-    border-radius: 18px;
-    padding: 24px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 26px;
+}
+.card-title {
+  font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700;
+  letter-spacing: -0.02em; margin-bottom: 18px; color: var(--text);
 }
 
-.card h2 {
-    margin-bottom: 14px;
+.enum-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.enum-list li {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--muted);
+  background: var(--surface-2); border: 1px solid var(--border);
+  padding: 7px 13px; border-radius: 6px;
+  transition: border-color .15s, color .15s;
+}
+.enum-list li:hover { border-color: var(--border-2); color: var(--text); }
+
+.card-link {
+  display: inline-block; margin-top: 16px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--dim); text-decoration: none;
+  border-bottom: 1px solid var(--border); padding-bottom: 1px;
+  transition: color .15s, border-color .15s;
+}
+.card-link:hover { color: var(--muted); border-color: var(--border-2); }
+
+/* ── SCORING ── */
+.score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.score-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 22px; position: relative; overflow: hidden;
+}
+.score-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.score-card.sc-blue::before   { background: var(--blue); }
+.score-card.sc-indigo::before { background: var(--indigo); }
+.score-card.sc-pass::before   { background: var(--pass); }
+
+.score-from {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+  color: var(--dim); margin-bottom: 9px; letter-spacing: 0.02em;
+}
+.score-name {
+  font-family: 'Space Mono', monospace; font-size: 0.95rem; font-weight: 700;
+  letter-spacing: -0.02em; margin-bottom: 10px;
+}
+.score-card.sc-blue   .score-name { color: var(--blue); }
+.score-card.sc-indigo .score-name { color: var(--indigo); }
+.score-card.sc-pass   .score-name { color: var(--pass); }
+
+.score-body { font-size: 0.83rem; color: var(--muted); line-height: 1.55; margin-bottom: 12px; }
+.score-thresh {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--dim);
 }
 
-.card ul {
-    padding-left: 18px;
+/* ── ROUTING TABLE ── */
+.rt-wrap {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+}
+.routing-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.routing-table th {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.67rem;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim);
+  padding: 13px 22px; text-align: left;
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+}
+.routing-table td {
+  padding: 14px 22px; border-bottom: 1px solid var(--border); vertical-align: top;
+}
+.routing-table tr:last-child td { border-bottom: none; }
+.routing-table tr:hover td { background: rgba(255,255,255,0.015); }
+
+.rb {
+  display: inline-block; font-family: 'JetBrains Mono', monospace;
+  font-size: 0.71rem; font-weight: 500; padding: 3px 9px; border-radius: 4px;
+}
+.rb-pass     { background: rgba(22,199,132,0.1); color: var(--pass);   border: 1px solid rgba(22,199,132,0.22); }
+.rb-fail     { background: rgba(239,68,68,0.1);  color: var(--fail);   border: 1px solid rgba(239,68,68,0.22); }
+.rb-retry    { background: rgba(245,158,11,0.1); color: var(--review); border: 1px solid rgba(245,158,11,0.22); }
+.rb-exhaust  { background: rgba(129,140,248,0.1);color: var(--indigo); border: 1px solid rgba(129,140,248,0.22); }
+
+.cond {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.77rem; color: var(--muted); line-height: 1.7;
+}
+.dest { font-family: 'JetBrains Mono', monospace; font-size: 0.77rem; color: var(--dim); }
+
+/* ── DESIGN DECISIONS ── */
+.dd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.dd-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left-width: 3px; border-radius: 0 12px 12px 0; padding: 22px 22px 22px 20px;
+}
+.dd-card.dd-blue   { border-left-color: var(--blue); }
+.dd-card.dd-indigo { border-left-color: var(--indigo); }
+.dd-card.dd-pass   { border-left-color: var(--pass); }
+.dd-card.dd-review { border-left-color: var(--review); }
+
+.dd-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px;
+}
+.dd-card.dd-blue   .dd-label { color: var(--blue); }
+.dd-card.dd-indigo .dd-label { color: var(--indigo); }
+.dd-card.dd-pass   .dd-label { color: var(--pass); }
+.dd-card.dd-review .dd-label { color: var(--review); }
+
+.dd-title {
+  font-family: 'Space Mono', monospace; font-size: 0.88rem; font-weight: 700;
+  letter-spacing: -0.02em; margin-bottom: 8px; color: var(--text);
+}
+.dd-body { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+/* ── API ── */
+.api-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.api-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 26px;
 }
 
-.card li {
-    margin-bottom: 10px;
-    color: #d5ddef;
+.method-row { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
+.method-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700;
+  background: rgba(22,199,132,0.1); color: var(--pass);
+  border: 1px solid rgba(22,199,132,0.28); padding: 4px 9px; border-radius: 5px;
+}
+.ep-path { font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; color: var(--text); }
+
+.auth-box {
+  background: rgba(129,140,248,0.05); border: 1px solid rgba(129,140,248,0.18);
+  border-radius: 9px; padding: 14px 16px; margin-bottom: 22px;
+}
+.auth-box-title {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+  color: var(--indigo); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px;
+}
+.auth-box-body { font-size: 0.81rem; color: var(--muted); line-height: 1.65; }
+
+.fields { display: flex; flex-direction: column; gap: 9px; }
+.field-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.f-name { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text); flex-shrink: 0; }
+.f-type {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--indigo);
+  background: rgba(129,140,248,0.08); border: 1px solid rgba(129,140,248,0.18);
+  padding: 2px 8px; border-radius: 4px; flex-shrink: 0;
+}
+.f-note { font-size: 0.78rem; color: var(--dim); text-align: right; flex-grow: 1; }
+
+.code-block {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.73rem;
+  line-height: 1.85; overflow-x: auto; white-space: pre;
 }
 
-.flow {
-    background: #11192d;
-    border-radius: 16px;
-    padding: 18px;
-    overflow-x: auto;
-    font-family: monospace;
-    white-space: pre;
-    color: #cfd7e6;
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border); padding: 48px 0;
+  text-align: center;
 }
-
-.endpoint {
-    background: #0f172a;
-    border: 1px solid #263554;
-    padding: 16px;
-    border-radius: 12px;
-    margin-top: 12px;
+.footer-logo {
+  font-family: 'Space Mono', monospace; font-weight: 700;
+  font-size: 1rem; color: var(--text);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-bottom: 16px;
 }
-
-.footer {
-    margin-top: 40px;
-    text-align: center;
-    color: #93a0bb;
+.footer-logo-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pass); }
+.footer-desc {
+  max-width: 560px; margin: 0 auto 24px;
+  font-size: 0.85rem; color: var(--muted); line-height: 1.75;
 }
+.footer-stack { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+.stack-item { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--dim); }
 
+/* ── CODE INLINE ── */
 code {
-    color: #9fd6ff;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.83em;
+  color: #9fd6ff; background: rgba(159,214,255,0.07);
+  padding: 1px 5px; border-radius: 3px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 860px) {
+  .pipeline-layout, .cat-grid, .api-grid, .dd-grid { grid-template-columns: 1fr; }
+  .score-grid { grid-template-columns: 1fr 1fr; }
+  .pipeline-diagram svg { max-width: 260px; }
+}
+@media (max-width: 560px) {
+  .score-grid { grid-template-columns: 1fr; }
+  .wrap { padding: 0 18px; }
+  header { padding: 0 18px; }
+  .hero h1 { font-size: 1.85rem; }
+  section { padding: 56px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
 }
 </style>
 </head>
-
 <body>
 
-<div class="container">
+<!-- ────────── HEADER ────────── -->
+<header>
+  <a class="h-logo" href="/">
+    <span class="h-logo-dot"></span>
+    ClaimWizard
+  </a>
+  <div class="h-right">
+    <a class="btn-ghost" href="https://github.com/shubhamjain25/Insurance-Langgraph-Flow" target="_blank" rel="noopener">GitHub ↗</a>
+    <a class="btn-primary" href="/docs">Try Service →</a>
+  </div>
+</header>
 
-<div class="top-cta">
-<a class="try-btn" href="/docs">
-Try this service now →
-</a>
-</div>
-
+<!-- ────────── HERO ────────── -->
 <section class="hero">
-<h1>🏥 Claim Wizard</h1>
-<p>
-AI-powered insurance claim document processing built using
-LangGraph, FastAPI, and Groq.
-Upload a medical document and the workflow performs OCR,
-field extraction, confidence scoring, and returns a final
-PASS / REVIEW / FAIL outcome.
-</p>
+  <div class="hero-glow"></div>
+  <div class="wrap">
+    <div class="hero-pill">
+      <span class="hero-pill-dot"></span>
+      Document Intelligence Pipeline
+    </div>
+    <h1>Insurance claims,<br/><em>validated by AI</em></h1>
+    <p class="hero-sub">
+      Upload a medical document. Claim Wizard performs OCR extraction, validates field
+      quality through a structured schema, evaluates claim–document alignment with dual
+      confidence scoring, and returns a PASS / REVIEW / FAIL verdict — orchestrated as a
+      stateful LangGraph workflow.
+    </p>
+    <div class="hero-tags">
+      <span class="hero-tag">LangGraph</span>
+      <span class="hero-tag">FastAPI</span>
+      <span class="hero-tag">Groq · Open-Source LLM</span>
+      <span class="hero-tag">OCR Space</span>
+      <span class="hero-tag">LangSmith Tracing</span>
+      <span class="hero-tag">Pydantic v2 · Discriminated Union</span>
+    </div>
+  </div>
 </section>
 
-<div class="grid">
+<!-- ────────── PIPELINE ────────── -->
+<section>
+  <div class="wrap">
+    <div class="s-label">Architecture</div>
+    <h2 class="s-title">Stateful routing graph</h2>
+    <p class="s-desc">
+      Each document traverses a structured pipeline. The parser extracts and scores the
+      document; the processor reconciles it against user claim data. Failed parses retry
+      up to twice before final aggregation.
+    </p>
 
-<div class="card">
-<h2>🧠 Workflow</h2>
+    <div class="pipeline-layout">
 
-<div class="flow">
-START
- ↓
-input_node
- ↓
-parser_node
- ├─ APPROVED → processor_node
- ├─ REJECTED → aggregator_node
- └─ FAILED → retry (max 2 retries)
+<!--      s-->
 
- ↓
-aggregator_node
- ↓
-END
-</div>
+      <!-- LEGEND -->
+      <div class="pipeline-legend">
+        <div class="leg-item">
+          <div class="leg-bar" style="background: var(--blue)"></div>
+          <div>
+            <div class="leg-name" style="color:var(--blue)">input_node</div>
+            <div class="leg-desc">Validates and hydrates the user-submitted form data into a typed <code>DocumentValidator</code> state. Sets <code>status → initiated</code> and passes <code>claim_category</code> + <code>document_category</code> downstream.</div>
+          </div>
+        </div>
+        <div class="leg-item">
+          <div class="leg-bar" style="background: var(--blue)"></div>
+          <div>
+            <div class="leg-name" style="color:var(--blue)">parser_node</div>
+            <div class="leg-desc">Calls OCR Space → feeds raw text into Groq with a per-document-category system prompt → validates JSON into a discriminated OCR schema carrying <code>clarity_score</code> and <code>classification_score</code>.</div>
+          </div>
+        </div>
+        <div class="leg-item">
+          <div class="leg-bar" style="background: var(--pass)"></div>
+          <div>
+            <div class="leg-name" style="color:var(--pass)">processor_node</div>
+            <div class="leg-desc">Reconciles OCR output against user claim. Applies document-category-aware rules — financial checks only fire on <code>HOSPITAL_BILL</code> and <code>PHARMACY_BILL</code>. Returns a <code>ProcessingResult</code>.</div>
+          </div>
+        </div>
+        <div class="leg-item">
+          <div class="leg-bar" style="background: var(--indigo)"></div>
+          <div>
+            <div class="leg-name" style="color:var(--indigo)">aggregator_node</div>
+            <div class="leg-desc">Terminal consolidation node — reached via any path (approved, rejected, retry-exhausted). Writes final status and prepares the API response payload.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-</div>
+<!-- ────────── CATEGORIES ────────── -->
+<section>
+  <div class="wrap">
+    <div class="s-label">Coverage</div>
+    <h2 class="s-title">Supported claim & document types</h2>
+    <p class="s-desc">Every (claim category × document category) pair maps to a dedicated extraction prompt and a tailored reconciliation ruleset in the processor.</p>
 
-<div class="card">
-<h2>📄 Supported Claim Categories</h2>
-<ul>
-<li>CONSULTATION</li>
-<li>DIAGNOSTIC</li>
-<li>PHARMACY</li>
-<li>DENTAL</li>
-<li>VISION</li>
-<li>ALTERNATIVE_MEDICINE</li>
-</ul>
-</div>
+    <div class="cat-grid">
+      <div class="card">
+        <div class="card-title">Claim Categories</div>
+        <ul class="enum-list">
+          <li>CONSULTATION</li>
+          <li>DIAGNOSTIC</li>
+          <li>PHARMACY</li>
+          <li>DENTAL</li>
+          <li>VISION</li>
+          <li>ALTERNATIVE_MEDICINE</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Document Categories</div>
+        <ul class="enum-list">
+          <li>PRESCRIPTION</li>
+          <li>HOSPITAL_BILL</li>
+          <li>LAB_REPORT</li>
+          <li>DIAGNOSTIC_REPORT</li>
+          <li>DISCHARGE_SUMMARY</li>
+          <li>PHARMACY_BILL</li>
+        </ul>
+        <a class="card-link" href="https://github.com/shubhamjain25/Insurance-Langgraph-Flow/tree/main/uploads" target="_blank" rel="noopener">
+          Try the service out with template documents uploaded →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
 
-<div class="card">
-<h2>📎 Supported Document Categories</h2>
-<ul>
-<li>PRESCRIPTION</li>
-<li>HOSPITAL_BILL</li>
-<li>LAB_REPORT</li>
-<li>DIAGNOSTIC_REPORT</li>
-<li>DISCHARGE_SUMMARY</li>
-<li>PHARMACY_BILL</li>
-</ul>
-<p>
-    <code>
-  Template documents present inside ./uploads inside the github repository:
-  <a
-    href="https://github.com/shubhamjain25/Insurance-Langgraph-Flow/tree/main/uploads"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    View Templates Docs
-  </a>
-        </code>
-</p>
-</div>
+<!-- ────────── SCORING ────────── -->
+<section>
+  <div class="wrap">
+    <div class="s-label">Scoring Model</div>
+    <h2 class="s-title">Two-stage, three-signal evaluation</h2>
+    <p class="s-desc">Two independent LLM calls emit three distinct confidence signals. Each gate must clear before advancing to the next stage.</p>
 
-<div class="card">
-<h2>📊 Scoring Signals</h2>
-<ul>
-<li><strong>clarity_score</strong> → document legibility & parse quality</li>
-<li><strong>classification_score</strong> → confidence of claim ↔ document match</li>
-<li><strong>confidence_score</strong> → processing confidence in final result</li>
-</ul>
-</div>
+    <div class="score-grid">
+      <div class="score-card sc-blue">
+        <div class="score-from">parser_node → OCR schema</div>
+        <div class="score-name">clarity_score</div>
+        <div class="score-body">How legible and parseable the uploaded image is. Reflects physical document quality — handwriting, scan resolution, lighting conditions.</div>
+        <div class="score-thresh">Threshold: &gt; 0.4 required to route APPROVED</div>
+      </div>
+      <div class="score-card sc-indigo">
+        <div class="score-from">parser_node → OCR schema</div>
+        <div class="score-name">classification_score</div>
+        <div class="score-body">Confidence that the document content matches the declared <code>claim_category</code> and <code>document_category</code>. Catches wrong document uploads early.</div>
+        <div class="score-thresh">Threshold: &gt; 0.4 required to route APPROVED</div>
+      </div>
+      <div class="score-card sc-pass">
+        <div class="score-from">processor_node → ProcessingResult</div>
+        <div class="score-name">confidence_score</div>
+        <div class="score-body">Overall reconciliation confidence — how strongly OCR-extracted fields (name, date, amount where applicable) match the user-submitted claim data.</div>
+        <div class="score-thresh">≥ 0.75 → PASS &nbsp; 0.5–0.75 → REVIEW &nbsp; &lt; 0.5 → FAIL</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<div class="card">
-<h2>⚙️ Routing Rules</h2>
-<ul>
-<li>Parsed + thresholds passed → APPROVED</li>
-<li>Parsed but low confidence → REJECTED</li>
-<li>Parse failure + retries left → Retry parser</li>
-<li>Retry exhausted → Final aggregation</li>
-</ul>
+<!-- ────────── ROUTING ────────── -->
+<section>
+  <div class="wrap">
+    <div class="s-label">Routing Logic</div>
+    <h2 class="s-title">parser_router decision table</h2>
+    <p class="s-desc">Evaluated after every <code>parser_node</code> execution. <code>count_itr</code> is an <code>Annotated[int, operator.add]</code> reducer — it accumulates across retries without overwriting.</p>
 
-</div>
+    <div class="rt-wrap">
+      <table class="routing-table">
+        <thead>
+          <tr>
+            <th>Route</th>
+            <th>Condition</th>
+            <th>Next Node</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="rb rb-pass">APPROVED</span></td>
+            <td class="cond">status == parsed_success<br/>AND clarity_score &gt; 0.4<br/>AND classification_score &gt; 0.4</td>
+            <td class="dest">→ processor_node</td>
+          </tr>
+          <tr>
+            <td><span class="rb rb-fail">REJECTED</span></td>
+            <td class="cond">status == parsed_success<br/>BUT either score ≤ 0.4</td>
+            <td class="dest">→ aggregator_node</td>
+          </tr>
+          <tr>
+            <td><span class="rb rb-retry">FAILED</span></td>
+            <td class="cond">status == parsed_failure<br/>AND count_itr &lt; 2</td>
+            <td class="dest">→ parser_node (retry)</td>
+          </tr>
+          <tr>
+            <td><span class="rb rb-exhaust">RETRY_EXHAUSTED</span></td>
+            <td class="cond">status == parsed_failure<br/>AND count_itr == 2</td>
+            <td class="dest">→ aggregator_node</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
 
-<!-- API CARD -->
-    <div class="card"> <h2>📡 API</h2> <div class="endpoint"> POST <code>/process-claim</code> </div>
-        <p style="margin-top:12px;color:#cfd7e6;">
-            Requires header: <code>x-api-key</code> </p> <p style=" margin-top:10px; color:#93a0bb; line-height:1.7; "> API Key = My name converted to lowercase without any spaces & hyphen in between. Hint: my name starts with s & last name is jain so it should be s******-jain <br><br> Example: <br> If my name = <code>John Doe</code> <br> then X-API-KEY = <code> john-doe</code> </p> </div>
+<!-- ────────── DESIGN DECISIONS ────────── -->
+<section>
+  <div class="wrap">
+    <div class="s-label">Technical Design</div>
+    <h2 class="s-title">Key implementation decisions</h2>
+    <p class="s-desc">Architectural choices made to work reliably with open-source LLMs and maintain a clean, extensible pipeline structure.</p>
 
-</div>
+    <div class="dd-grid">
+      <div class="dd-card dd-indigo">
+        <div class="dd-label">Schema Design</div>
+        <div class="dd-title">Discriminated Union OCR schemas</div>
+        <div class="dd-body">
+          Rather than a single flat OCR schema, each document category has a dedicated Pydantic model with domain-specific fields
+          (<code>PrescriptionOCR</code>, <code>HospitalBillOCR</code>, etc.). Pydantic's discriminated union on
+          <code>doc_type</code> resolves the correct model at validation time. This keeps schemas strict and prevents phantom
+          fields from polluting unrelated document types.
+        </div>
+      </div>
+      <div class="dd-card dd-blue">
+        <div class="dd-label">Open-Source LLM Compatibility</div>
+        <div class="dd-title">Manual JSON parse + match statement</div>
+        <div class="dd-body">
+          LangChain's <code>with_structured_output</code> is unreliable with smaller open-source models hosted on Groq.
+          Instead, the LLM is prompted to return raw JSON; the response is parsed with <code>json.loads()</code> and
+          routed through a <code>match document_category</code> block that explicitly instantiates the correct Pydantic
+          model. <code>field_validator</code> guards handle <code>None</code>-as-string quirks from the model.
+        </div>
+      </div>
+      <div class="dd-card dd-pass">
+        <div class="dd-label">Processor Design</div>
+        <div class="dd-title">Document-aware reconciliation queries</div>
+        <div class="dd-body">
+          A single processor prompt caused false FAILs — financial rules fired on <code>PRESCRIPTION</code> documents
+          which carry no <code>total_amount</code> field. The processor now routes to one of six system prompts by
+          <code>document_category</code>: financial rules apply only to <code>HOSPITAL_BILL</code> and
+          <code>PHARMACY_BILL</code>; date logic is also tailored (e.g. discharge summary checks a date window,
+          not an exact match).
+        </div>
+      </div>
+      <div class="dd-card dd-review">
+        <div class="dd-label">Retry Circuit Breaker</div>
+        <div class="dd-title">Additive count_itr reducer</div>
+        <div class="dd-body">
+          LangGraph state reducers prevent infinite retry loops without external counters.
+          <code>count_itr: Annotated[int, operator.add]</code> accumulates across every pass through
+          <code>parser_node</code>. The <code>parser_router</code> checks <code>count_itr == 2</code> to
+          emit <code>RETRY_EXHAUSTED</code> and short-circuit to <code>aggregator_node</code>, guarding
+          against network failures stalling the pipeline indefinitely.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<div class="footer"> <div style=" font-weight:700; margin-bottom:14px; " > Powered by LangGraph • FastAPI • Groq </div> <div style=" max-width:850px; margin:auto; line-height:1.8; color:#b8c4d9; " > Claim Wizard is an AI-powered insurance document processing workflow that automates claim validation. <br><br> Upload a supported medical document and the system performs OCR extraction, validates document quality, evaluates whether the uploaded document matches the selected claim and document category, applies confidence scoring, and returns a final processing outcome with supporting reasoning. <br><br> Built as a stateful LangGraph pipeline with structured routing, retry handling, and consolidated output for insurance claim review workflows. </div> </div>
+<!-- ────────── API ────────── -->
+<section>
+  <div class="wrap">
+    <div class="s-label">API Reference</div>
+    <h2 class="s-title">POST /process-claim</h2>
+    <p class="s-desc">Accepts a multipart form. Returns the full <code>DocumentValidator</code> state including raw OCR output, scores, and the final processing result.</p>
 
-</div>
+    <div class="api-grid">
+
+      <!-- Request -->
+      <div class="api-box">
+        <div class="method-row">
+          <span class="method-tag">POST</span>
+          <span class="ep-path">/process-claim</span>
+        </div>
+
+        <div class="auth-box">
+          <div class="auth-box-title">Authentication</div>
+          <div class="auth-box-body">
+            Header: <code>x-api-key: &lt;value&gt;</code><br/>
+            The key is the author's full name, lowercased with a hyphen separator.
+            Starts with <code>s</code>, ends with <code>jain</code>.
+            KEY: <code>s******-jain</code>
+          </div>
+        </div>
+
+        <div class="fields">
+          <div class="field-row">
+            <span class="f-name">patient_name</span>
+            <span class="f-note">full name as on the document</span>
+            <span class="f-type">string</span>
+          </div>
+          <div class="field-row">
+            <span class="f-name">treatment_date</span>
+            <span class="f-note"></span>
+            <span class="f-type">YYYY-MM-DD</span>
+          </div>
+          <div class="field-row">
+            <span class="f-name">claimed_amt</span>
+            <span class="f-note">amount in INR</span>
+            <span class="f-type">float</span>
+          </div>
+          <div class="field-row">
+            <span class="f-name">claim_category</span>
+            <span class="f-note"></span>
+            <span class="f-type">ClaimCategory</span>
+          </div>
+          <div class="field-row">
+            <span class="f-name">document_category</span>
+            <span class="f-note"></span>
+            <span class="f-type">DocumentCategory</span>
+          </div>
+          <div class="field-row">
+            <span class="f-name">document</span>
+            <span class="f-note">image of the medical document</span>
+            <span class="f-type">File</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Response -->
+      <div class="api-box">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--dim); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:16px;">
+          Response · 200 OK
+        </div>
+        <div class="code-block"><span style="color:#16C784">{</span>
+  <span style="color:#9fd6ff">"status"</span>: <span style="color:#a8d8a8">"success"</span>,
+  <span style="color:#9fd6ff">"data"</span>: <span style="color:#16C784">{</span>
+    <span style="color:#9fd6ff">"status"</span>: <span style="color:#a8d8a8">"processed"</span>,
+    <span style="color:#9fd6ff">"ocr_information"</span>: <span style="color:#818CF8">{</span>
+      <span style="color:#9fd6ff">"doc_type"</span>: <span style="color:#a8d8a8">"PRESCRIPTION"</span>,
+      <span style="color:#9fd6ff">"patient_name"</span>: <span style="color:#a8d8a8">"..."</span>,
+      <span style="color:#9fd6ff">"clarity_score"</span>: <span style="color:#F59E0B">0.87</span>,
+      <span style="color:#9fd6ff">"classification_score"</span>: <span style="color:#F59E0B">0.92</span>,
+      <span style="color:#9fd6ff">"reasoning"</span>: <span style="color:#a8d8a8">"..."</span>
+    <span style="color:#818CF8">}</span>,
+    <span style="color:#9fd6ff">"processing_result"</span>: <span style="color:#818CF8">{</span>
+      <span style="color:#9fd6ff">"result"</span>: <span style="color:#16C784">"PASS"</span>,
+      <span style="color:#9fd6ff">"confidence_score"</span>: <span style="color:#F59E0B">0.91</span>,
+      <span style="color:#9fd6ff">"reasoning"</span>: <span style="color:#a8d8a8">"..."</span>
+    <span style="color:#818CF8">}</span>,
+    <span style="color:#9fd6ff">"claim_category"</span>: <span style="color:#a8d8a8">"CONSULTATION"</span>,
+    <span style="color:#9fd6ff">"document_category"</span>: <span style="color:#a8d8a8">"PRESCRIPTION"</span>
+  <span style="color:#16C784">}</span>
+<span style="color:#16C784">}</span></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ────────── FOOTER ────────── -->
+<footer>
+  <div class="wrap">
+    <div class="footer-logo">
+      <span class="footer-logo-dot"></span>
+      ClaimWizard
+    </div>
+    <p class="footer-desc">
+      A stateful LangGraph pipeline for insurance claim document validation. Performs OCR
+      extraction, validates document quality through Pydantic discriminated union schemas,
+      applies document-aware confidence scoring, and returns a final PASS / REVIEW / FAIL
+      verdict with supporting reasoning.
+    </p>
+    <div class="footer-stack">
+      <span class="stack-item">LangGraph</span>
+      <span class="stack-item">·</span>
+      <span class="stack-item">FastAPI</span>
+      <span class="stack-item">·</span>
+      <span class="stack-item">Groq</span>
+      <span class="stack-item">·</span>
+      <span class="stack-item">OCR Space</span>
+      <span class="stack-item">·</span>
+      <span class="stack-item">LangSmith</span>
+      <span class="stack-item">·</span>
+      <span class="stack-item">Pydantic v2</span>
+    </div>
+  </div>
+</footer>
 
 </body>
 </html>
