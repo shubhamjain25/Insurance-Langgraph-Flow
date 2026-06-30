@@ -1,22 +1,66 @@
 from agent.schema_structures.Schema import *
 from pydantic import BaseModel
 
+# COMMON_INSTRUCTIONS = """
+#
+# CRITICAL INSTRUCTIONS:
+# 1. You must output the ACTUAL DATA extracted from the text.
+# 2. DO NOT output the schema definitions or 'properties' blocks.
+# 3. DO NOT wrap the output in markdown code blocks (like ```json). Just return the raw JSON braces.
+#
+# Instructions:
+# - Use only information explicitly present in the OCR text.
+# - If information is blurry or unclear give a lower clarity_score.
+# - If information does not align with the claim & document category, give a lower confidence_score.
+# - If numeric fields are unknown, return 0. Do not return null.
+# - If a field cannot be determined, return null/0/blank depending on its type.
+# - Do not invent, infer, or hallucinate values.
+# """
+
 COMMON_INSTRUCTIONS = """
 
 CRITICAL INSTRUCTIONS:
 1. You must output the ACTUAL DATA extracted from the text.
-2. DO NOT output the schema definitions or 'properties' blocks. 
+2. DO NOT output the schema definitions or 'properties' blocks.
 3. DO NOT wrap the output in markdown code blocks (like ```json). Just return the raw JSON braces.
 
-Instructions:
-- Use only information explicitly present in the OCR text.
-- If information is blurry or unclear give a lower clarity_score.
-- If information does not align with the claim & document category, give a lower confidence_score.
-- If numeric fields are unknown, return 0. Do not return null.
-- If a field cannot be determined, return null/0/blank depending on its type.
-- Do not invent, infer, or hallucinate values.
-"""
+IMPORTANT CONTEXT: You are NOT looking at the original photo. You only see OCR-extracted
+text, which is a downstream artifact of that photo. You cannot directly judge blur — you
+can only infer document quality from how complete and coherent the OCR text is. Treat the
+OCR text as your only evidence of image quality.
 
+CLARITY_SCORE RUBRIC (you must follow this exactly — it is not a vague impression):
+- Start clarity_score at 1.0, then deduct for each issue found in the OCR text:
+  - Deduct 0.15 for EVERY required schema field that is null, blank, or "0" because it
+    could not be located in the OCR text (a field missing because the document genuinely
+    doesn't have it — e.g. no bill_date printed — counts the same as a field obscured by
+    blur; you cannot distinguish the two from text alone, so both must lower the score).
+  - Deduct 0.1 for every field whose value looks fragmented, truncated, or contains
+    OCR noise (random symbols, broken words, inconsistent spacing, repeated characters).
+  - Deduct 0.1 if multiple words in the OCR text appear malformed or nonsensical, even
+    in fields you are not extracting (this signals general scan/photo quality).
+  - Deduct 0.2 if the OCR text is extremely short or sparse relative to what this
+    document type should normally contain.
+- Floor clarity_score at 0.0. Do not round up to compensate for a "mostly readable" feel.
+
+CONSISTENCY RULE (mandatory):
+- If your reasoning states that ANY field "could not be identified," "is unclear,"
+  "is missing," or similar — clarity_score MUST be 0.75 or lower. A reasoning that
+  admits missing information paired with a clarity_score above 0.75 is a contradiction
+  and is not allowed.
+- Re-read your own reasoning before finalizing clarity_score and check this rule.
+
+General Instructions:
+- Use only information explicitly present in the OCR text.
+- classification_score reflects whether the document's CONTENT (not its clarity) matches
+  the declared claim_category and document_category. Keep this independent of clarity_score.
+- If numeric fields are unknown, return 0. Do not return null.
+- If string fields are unknown, return empty string "". Do not return null.
+- If a non-numeric field cannot be determined, return null/blank depending on its type.
+- Do not invent, infer, or hallucinate values.
+- In `reasoning`, explicitly name every field that was missing, blank, or low quality —
+  do not just describe the document generally.
+"""
 
 def get_prescription_system_query(
         relevant_schema: type[BaseModel],
